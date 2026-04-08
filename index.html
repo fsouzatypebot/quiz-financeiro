@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Diagnóstico Financeiro Gratuito — Minhas Finanças Organizadas</title>
+  <meta name="description" content="Descubra por que seu dinheiro some antes do fim do mês. 7 perguntas, 3 minutos, diagnóstico personalizado gratuito." />
+  <meta property="og:title" content="Diagnóstico Financeiro Gratuito" />
+  <meta property="og:description" content="7 perguntas para descobrir onde seu dinheiro está sendo perdido." />
+  <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Plus Jakarta Sans', 'Segoe UI', sans-serif; background: #f8faf9; color: #111d16; min-height: 100vh; }
+    :root {
+      --bg: #f8faf9; --card: #ffffff; --s2: #f0f7f4; --s3: #e0f0e8;
+      --acc: #1a9a5c; --acc-l: #e6f7ef; --acc-d: #127a46;
+      --txt: #111d16; --txt2: #4a6357; --txt3: #8aaa98;
+      --border: #d8ece2; --danger: #dc3545; --warn: #e8930a;
+      --radius: 14px; --rs: 8px; --rm: 10px;
+      --shadow: 0 2px 12px rgba(26,154,92,.08), 0 1px 3px rgba(0,0,0,.06);
+      --shadow-lg: 0 8px 32px rgba(26,154,92,.14), 0 2px 8px rgba(0,0,0,.08);
+    }
+    .page-wrap { max-width: 580px; margin: 0 auto; padding: 2rem 1.25rem 5rem; }
+    .screen { display: none; }
+    .screen.active { display: block; animation: si .38s cubic-bezier(.22,1,.36,1) both; }
+    @keyframes si { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+    .chip { display: inline-flex; align-items: center; gap: 6px; background: var(--acc-l); color: var(--acc-d); font-size: 11px; font-weight: 700; padding: 5px 13px; border-radius: 20px; letter-spacing: .5px; margin-bottom: 1.25rem; border: 1px solid rgba(26,154,92,.15); }
+    .chip-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--acc); animation: blink 2s infinite; }
+    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+
+    h1 { font-size: clamp(22px, 5vw, 28px); font-weight: 700; line-height: 1.25; margin-bottom: .75rem; letter-spacing: -.4px; }
+    h1 em { color: var(--acc); font-style: normal; }
+    h2 { font-size: 22px; font-weight: 700; letter-spacing: -.3px; margin-bottom: .5rem; }
+    .lead { font-size: 14px; color: var(--txt2); line-height: 1.7; margin-bottom: 1.75rem; }
+
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1.75rem; }
+    .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--rm); padding: 14px; text-align: center; box-shadow: var(--shadow); }
+    .stat-n { font-size: 20px; font-weight: 700; color: var(--acc); margin-bottom: 2px; }
+    .stat-l { font-size: 11px; color: var(--txt3); }
+
+    .btn-main { width: 100%; padding: 16px; background: var(--acc); color: #fff; font-size: 15px; font-weight: 700; border: none; border-radius: var(--radius); cursor: pointer; transition: all .2s; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: var(--shadow-lg); }
+    .btn-main:hover { background: var(--acc-d); transform: translateY(-2px); box-shadow: 0 12px 32px rgba(26,154,92,.25); }
+    .btn-main svg { transition: transform .2s; }
+    .btn-main:hover svg { transform: translateX(4px); }
+
+    .btn-adv { width: 100%; margin-top: 1.25rem; padding: 15px; background: var(--s3); color: var(--txt3); font-size: 14px; font-weight: 700; border: 1.5px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: all .2s; pointer-events: none; opacity: .6; font-family: inherit; }
+    .btn-adv.on { opacity: 1; pointer-events: all; background: var(--acc); color: #fff; border-color: transparent; box-shadow: var(--shadow-lg); }
+    .btn-adv.on:hover { background: var(--acc-d); transform: translateY(-2px); }
+
+    .prog-wrap { margin-bottom: 2rem; }
+    .prog-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .prog-q { font-size: 12px; color: var(--txt3); font-weight: 600; }
+    .prog-pct { font-size: 12px; color: var(--acc); font-weight: 700; }
+    .prog-track { height: 5px; background: var(--s3); border-radius: 3px; }
+    .prog-fill { height: 5px; background: linear-gradient(90deg, var(--acc-d), var(--acc)); border-radius: 3px; transition: width .5s cubic-bezier(.22,1,.36,1); }
+
+    .q-cat { font-size: 11px; font-weight: 700; color: var(--acc); letter-spacing: .7px; margin-bottom: .5rem; }
+    .q-txt { font-size: 19px; font-weight: 700; line-height: 1.35; margin-bottom: 1.5rem; letter-spacing: -.3px; }
+
+    .opts { display: flex; flex-direction: column; gap: 9px; }
+    .opt { display: flex; align-items: flex-start; border: 1.5px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: all .18s; background: var(--card); overflow: hidden; box-shadow: var(--shadow); -webkit-tap-highlight-color: transparent; }
+    .opt:hover { border-color: var(--acc); box-shadow: 0 4px 16px rgba(26,154,92,.12); }
+    .opt.sel { border-color: var(--acc); background: var(--acc-l); box-shadow: 0 4px 16px rgba(26,154,92,.14); }
+    .opt-ico { width: 48px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 18px; background: var(--s2); border-right: 1.5px solid var(--border); align-self: stretch; transition: background .18s; }
+    .opt.sel .opt-ico { background: var(--acc-l); border-color: rgba(26,154,92,.2); }
+    .opt-body { padding: 13px 14px; flex: 1; }
+    .opt-t { font-size: 13px; font-weight: 600; line-height: 1.4; color: var(--txt); }
+    .opt-s { font-size: 12px; color: var(--txt3); margin-top: 3px; line-height: 1.35; }
+    .opt-check { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin: 14px 14px 0 0; font-size: 11px; color: transparent; transition: all .18s; }
+    .opt.sel .opt-check { background: var(--acc); border-color: var(--acc); color: #fff; }
+
+    .capture-card { background: var(--card); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow); margin-bottom: 1rem; }
+    .field-wrap { margin-bottom: 1rem; }
+    .field-wrap:last-child { margin-bottom: 0; }
+    .field-label { font-size: 12px; font-weight: 700; color: var(--txt2); margin-bottom: 6px; letter-spacing: .2px; }
+    .field-input { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: var(--rm); font-size: 14px; font-family: inherit; color: var(--txt); background: var(--bg); transition: border-color .2s; outline: none; appearance: none; -webkit-appearance: none; }
+    .field-input:focus { border-color: var(--acc); background: #fff; }
+    .field-input::placeholder { color: var(--txt3); }
+    select.field-input { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238aaa98' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+    .capture-note { font-size: 12px; color: var(--txt3); margin-top: .5rem; text-align: center; line-height: 1.5; }
+
+    .result-top { text-align: center; padding: 1.5rem 0 1rem; }
+    .score-ring { width: 110px; height: 110px; margin: 0 auto 1.25rem; position: relative; }
+    .score-ring svg { transform: rotate(-90deg); }
+    .score-inner { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .score-big { font-size: 30px; font-weight: 700; color: var(--acc); line-height: 1; }
+    .score-lbl { font-size: 9px; color: var(--txt3); letter-spacing: .7px; margin-top: 2px; }
+
+    .diag-box { background: var(--card); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin: 1.25rem 0; box-shadow: var(--shadow); }
+    .diag-hd { font-size: 10px; font-weight: 700; color: var(--txt3); letter-spacing: .8px; margin-bottom: 1rem; text-transform: uppercase; }
+    .diag-row { display: flex; gap: 12px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid var(--s3); }
+    .diag-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .diag-icon { width: 34px; height: 34px; border-radius: var(--rs); display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+    .di-r { background: #ffeaea; }
+    .di-y { background: #fff4e0; }
+    .di-g { background: var(--acc-l); }
+    .diag-body { font-size: 13px; color: var(--txt2); line-height: 1.55; padding-top: 7px; }
+    .diag-body strong { color: var(--txt); font-weight: 700; }
+
+    .section-ttl { font-size: 10px; font-weight: 700; color: var(--txt3); letter-spacing: .9px; margin-bottom: .75rem; display: flex; align-items: center; gap: 8px; text-transform: uppercase; }
+    .section-ttl::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    .calc-card { background: var(--card); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1rem; box-shadow: var(--shadow); }
+    .calc-ttl { font-size: 14px; font-weight: 700; color: var(--txt); margin-bottom: .25rem; }
+    .calc-sub { font-size: 12px; color: var(--txt2); margin-bottom: 1.25rem; line-height: 1.5; }
+    .sl-row { margin-bottom: .75rem; }
+    .sl-lbl { display: flex; justify-content: space-between; font-size: 12px; color: var(--txt3); margin-bottom: 7px; font-weight: 600; }
+    .sl-val { color: var(--acc); font-weight: 700; }
+
+    input[type="range"] { width: 100%; height: 5px; background: var(--s3); border-radius: 3px; outline: none; -webkit-appearance: none; cursor: pointer; }
+    input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: var(--acc); cursor: pointer; border: 3px solid #fff; box-shadow: 0 2px 6px rgba(26,154,92,.3); }
+    input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: var(--acc); cursor: pointer; border: 3px solid #fff; }
+
+    .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 1rem; }
+    .met { background: var(--s2); border-radius: var(--rs); padding: 11px 13px; border: 1px solid var(--border); }
+    .met-l { font-size: 11px; color: var(--txt3); margin-bottom: 4px; font-weight: 600; }
+    .met-v { font-size: 17px; font-weight: 700; }
+    .met-v.g { color: var(--acc); }
+    .met-v.r { color: var(--danger); }
+    .met-v.y { color: var(--warn); }
+
+    .goal-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 1rem; }
+    .gc { padding: 6px 13px; border-radius: 20px; border: 1.5px solid var(--border); background: var(--s2); color: var(--txt2); font-size: 12px; font-weight: 600; cursor: pointer; transition: all .2s; font-family: inherit; }
+    .gc.on { background: var(--acc-l); border-color: var(--acc); color: var(--acc-d); }
+    .goal-result { background: var(--acc-l); border: 1.5px solid rgba(26,154,92,.2); border-radius: var(--rm); padding: 14px; text-align: center; margin-top: .75rem; }
+    .goal-num { font-size: 32px; font-weight: 700; color: var(--acc); line-height: 1; }
+    .goal-sub { font-size: 13px; color: var(--txt2); margin-top: 4px; }
+
+    .mockup-wrap { background: var(--card); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 1.25rem; box-shadow: var(--shadow); margin-bottom: 1rem; position: relative; }
+    .mock-label { position: absolute; top: 12px; right: 14px; font-size: 9px; font-weight: 700; color: var(--txt3); letter-spacing: .6px; text-transform: uppercase; }
+    .mock-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: .75rem; border-bottom: 1px solid var(--border); }
+    .mock-greet { font-size: 13px; color: var(--txt2); }
+    .mock-greet strong { display: block; font-size: 15px; font-weight: 700; color: var(--txt); }
+    .mock-bell { width: 30px; height: 30px; border-radius: var(--rs); background: var(--s2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 13px; }
+    .mock-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: .75rem; }
+    .mock-c { border-radius: var(--rm); padding: 11px 13px; border: 1px solid; }
+    .mock-c.g { background: var(--acc-l); border-color: rgba(26,154,92,.2); }
+    .mock-c.r { background: #fff0f0; border-color: rgba(220,53,69,.15); }
+    .mock-cl { font-size: 10px; color: var(--txt3); margin-bottom: 4px; font-weight: 600; }
+    .mock-cv { font-size: 16px; font-weight: 700; }
+    .mock-cv.g { color: var(--acc-d); }
+    .mock-cv.r { color: var(--danger); }
+    .mock-ct { font-size: 10px; margin-top: 2px; }
+    .mock-ct.up { color: var(--acc); }
+    .mock-ct.dn { color: var(--danger); }
+    .mock-kpis { display: flex; gap: 6px; margin-bottom: .75rem; }
+    .mock-kpi { flex: 1; background: var(--s2); border-radius: 6px; padding: 7px; text-align: center; border: 1px solid var(--border); }
+    .mock-kpi span { display: block; font-size: 11px; font-weight: 700; color: var(--acc); }
+    .mock-kpi small { font-size: 9px; color: var(--txt3); }
+    .mock-txn-ttl { font-size: 10px; font-weight: 700; color: var(--txt3); margin-bottom: .5rem; letter-spacing: .4px; text-transform: uppercase; }
+    .mock-txns { display: flex; flex-direction: column; gap: 5px; }
+    .mock-txn { display: flex; justify-content: space-between; align-items: center; padding: 7px 10px; background: var(--s2); border-radius: 7px; border: 1px solid var(--border); }
+    .mock-txn-l { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--txt2); }
+    .mock-cat { width: 24px; height: 24px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+    .mock-amt { font-size: 12px; font-weight: 700; color: var(--danger); }
+
+    .pricing-intro { text-align: center; margin-bottom: 1.5rem; }
+    .pricing-intro p { font-size: 13px; color: var(--txt2); line-height: 1.6; }
+    .urgency-box { background: #fff8ec; border: 1.5px solid rgba(232,147,10,.25); border-radius: var(--rs); padding: 11px 14px; display: flex; align-items: center; gap: 10px; margin: .75rem 0; }
+    .ub-icon { font-size: 16px; }
+    .ub-txt { font-size: 12px; color: #7a4f00; line-height: 1.4; font-weight: 500; }
+
+    .plans { display: flex; flex-direction: column; gap: 12px; margin-bottom: 1.25rem; }
+    .plan { background: var(--card); border: 2px solid var(--border); border-radius: var(--radius); padding: 1.25rem; cursor: default; transition: all .2s; position: relative; box-shadow: var(--shadow); }
+    .plan.featured { border-color: var(--acc); box-shadow: 0 8px 28px rgba(26,154,92,.18); margin-top: 18px; }
+    .plan-badge { position: absolute; top: -13px; left: 50%; transform: translateX(-50%); background: var(--acc); color: #fff; font-size: 10px; font-weight: 700; padding: 4px 14px; border-radius: 20px; letter-spacing: .4px; white-space: nowrap; }
+    .plan-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: .85rem; }
+    .plan-name { font-size: 15px; font-weight: 700; color: var(--txt); }
+    .plan-period { font-size: 11px; color: var(--txt3); margin-top: 2px; font-weight: 500; }
+    .plan-price { text-align: right; }
+    .plan-from { font-size: 11px; color: var(--txt3); text-decoration: line-through; }
+    .plan-val { font-size: 26px; font-weight: 700; color: var(--acc); line-height: 1; }
+    .plan-val span { font-size: 13px; font-weight: 500; color: var(--txt2); }
+    .plan-billed { font-size: 10px; color: var(--txt3); margin-top: 1px; }
+    .plan-saving { display: inline-block; background: var(--acc-l); color: var(--acc-d); font-size: 10px; font-weight: 700; padding: 2px 9px; border-radius: 10px; margin-bottom: .85rem; border: 1px solid rgba(26,154,92,.15); }
+    .plan-features { display: flex; flex-direction: column; gap: 6px; margin-bottom: .85rem; }
+    .plan-feat { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--txt2); }
+    .pf-ck { width: 17px; height: 17px; border-radius: 50%; background: var(--acc-l); border: 1px solid rgba(26,154,92,.2); display: flex; align-items: center; justify-content: center; font-size: 9px; color: var(--acc); flex-shrink: 0; font-weight: 700; }
+    .pf-ck.no { background: #fff0f0; border-color: rgba(220,53,69,.2); color: var(--danger); }
+    .plan-cta { width: 100%; padding: 13px; border: 2px solid var(--border); border-radius: var(--rs); font-size: 13px; font-weight: 700; cursor: pointer; transition: all .2s; background: var(--s2); color: var(--txt2); font-family: inherit; }
+    .plan.featured .plan-cta { background: var(--acc); color: #fff; border-color: transparent; box-shadow: var(--shadow-lg); }
+    .plan.featured .plan-cta:hover { background: var(--acc-d); }
+    .plan-cta:hover { border-color: var(--acc); color: var(--acc); }
+
+    .guarantee { display: flex; align-items: center; gap: 10px; background: var(--s2); border: 1px solid var(--border); border-radius: var(--rs); padding: 12px 14px; margin-top: .75rem; }
+    .gua-icon { font-size: 20px; flex-shrink: 0; }
+    .gua-txt { font-size: 12px; color: var(--txt2); line-height: 1.5; }
+    .gua-txt strong { color: var(--txt); font-weight: 700; }
+    .divider { height: 1px; background: var(--border); margin: 1.5rem 0; }
+    .footer-note { text-align: center; font-size: 12px; color: var(--txt3); line-height: 1.6; }
+    .page-note { text-align: center; font-size: 11px; color: var(--txt3); margin-top: .75rem; display: flex; align-items: center; justify-content: center; gap: 4px; }
+
+    @media (max-width: 420px) {
+      .page-wrap { padding: 1.25rem 1rem 4rem; }
+      h1 { font-size: 22px; }
+      .q-txt { font-size: 17px; }
+      .metrics-grid { grid-template-columns: 1fr; }
+      .mock-kpis { flex-wrap: wrap; }
+      .mock-kpi { min-width: calc(50% - 3px); }
+    }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <!-- S0: LANDING -->
+  <div id="s0" class="screen active">
+    <div style="padding-top:.5rem">
+      <div class="chip"><span class="chip-dot"></span>DIAGNÓSTICO FINANCEIRO GRATUITO</div>
+      <h1>Seu dinheiro tem um <em>vazamento invisível</em> — vamos descobrir onde</h1>
+      <p class="lead">7 perguntas rápidas. 3 minutos. Um diagnóstico honesto sobre por que seu dinheiro desaparece — e um plano personalizado para você a partir de hoje.</p>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-n">23k+</div><div class="stat-l">já fizeram</div></div>
+        <div class="stat-card"><div class="stat-n">3 min</div><div class="stat-l">tempo médio</div></div>
+        <div class="stat-card"><div class="stat-n">100%</div><div class="stat-l">gratuito</div></div>
+      </div>
+      <button class="btn-main" onclick="goTo('s1')">Quero meu diagnóstico <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <p class="page-note">🔒 Sem cadastro prévio. Seu resultado aparece no final.</p>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div id="s1" class="screen">
+    <div class="prog-wrap"><div class="prog-top"><span class="prog-q">1 de 7</span><span class="prog-pct">14%</span></div><div class="prog-track"><div class="prog-fill" style="width:14%"></div></div></div>
+    <div class="q-cat">SITUAÇÃO ATUAL</div>
+    <div class="q-txt">Qual frase mais descreve sua relação com o dinheiro hoje?</div>
+    <div class="opts">
+      <div class="opt" onclick="pick(this,'s1','a',1)"><div class="opt-ico">😰</div><div class="opt-body"><div class="opt-t">Vivo no limite — mês sim, mês não o dinheiro não fecha</div><div class="opt-s">Sempre falta algo antes do próximo salário</div></div><div class="opt-check">✓</div></div>
+      <div class="opt" onclick="pick(this,'s1','b',1)"><div class="opt-ico">😕</div><div class="opt-body"><div class="opt-t">Pago as contas, mas nunca sobra nada para guardar</div><div class="opt-s">Vivo pagando boletos sem conseguir acumular nada</div></div><div class="opt-check">✓</div></div>
+      <div class="opt" onclick="pick(this,'s1','c',1)"><div class="opt-ico">😤</div><div class="opt-body"><div class="opt-t">Tenho renda boa, mas não sei para onde vai o dinheiro</div><div class="opt-s">O mês acaba e fica a pergunta: onde foi parar?</div></div><div class="opt-check">✓</div></div>
+      <div class="opt" onclick="pick(this,'s1','d',1)"><div class="opt-ico">🙂</div><div class="opt-body"><div class="opt-t">Me viro bem, mas quero organizar para investir mais</div><div class="opt-s">Falta um sistema para dar o próximo passo</div></div><div class="opt-check">✓</div></div>
+    </div>
+    <button class="btn-adv" id="b1" onclick="adv('s2')">Próxima →</button>
+  </div>
+
+  <!-- S2 -->
+  <div id="s2" class="screen">
+    <div class="prog-wrap"><div class="prog-top"><span class="prog-q">2 de 7</span><span class="prog-pct">28%</span></div><div class="prog-track"><div class="prog-fill" style="width:28%"></div></div></div>
+    <div class="q-cat">CARTÃO DE CRÉDITO</div>
+    <div class="q-txt">Como está sua relação com o cartão de crédito hoje?</div>
+    <div class="opts">
+      <div class="opt" onclick="pick(this,'s2','a',2)"><div class="opt-ico">🔥</div><div class="opt-body"><div class="opt-t">Pago só o mínimo — a dívida só cresce</div><div class="opt-s">Sei que estou perdendo dinheiro mas não consigo sair</div></div><div class="opt-check">✓</div></div>
+      <div class="opt" onclick="pick(this,'s2','b',2)"><div class="opt-ico">😬</div><div class="opt-body"><div class="opt-t">Pago parcial — o rotativo corrói meu orçamento todo mês</div><div class="opt-s">Nunca quito de vez, sempre fica uma parcela</div></div><div class="opt-check">✓</div></div>
+      <div class="opt" onclick="pick(this,'s2','c',2)"><div class="opt-ico">😓</div><div class="opt-body"><div class="opt-t">Pago o total mas o cartão já está cheio de novo</div><div class="opt-s">Quito uma fatura e outra já chega absurda</div></div><div class="opt-check">✓</div></div>
+      <div class="opt" onclick="pick(this,'s2','d',2)"><div class="opt-ico">✅</div><div class="opt-body"><div class="opt-t">Pago sempre e uso de forma estratégica</div><div class="opt-s">Quero automatizar ainda mais o controle</div></div><div class="opt-check">✓</div></div>
+    </div>
+    <button class="btn-adv" id="b2" onclick="adv('s3')">Próxima →</button>
+  </div>
+
+  <!-- S3 -->
+  <div id="s3" class="screen">
+    <div class="prog-wrap"><div class="prog-top"><span class="prog-q">3 de 7</span><span class="prog-pct">42%</span></div><div class="prog-track"><div class="prog-fill" style="width:42%"></div></div></div>
+    <div class="q-cat">CONSCIÊNCIA FINANCEIRA</div>
+    <div class="q-txt">Você sabe exatamente onde seu dinheiro foi parar este mês?</div>
+    <div class="opts">
+      <div class="opt" onclick="pick(this,'s3','a',3)"><div class="opt-ico">🤷</div><div class="opt-body"><div class="opt-t">Não tenho a menor ideia — ele some e ponto</div><div class="opt-s">É como se evaporasse da minha conta</div></div><div class="opt-check">✓</div></div>
+      <div class="opt" onclick="pick(this,'s3','b',3)"><div class="opt-ico">🧾</div><div class="opt-body"><div class="opt-t">Sei as contas fixas, mas os gastos do dia são mistério</div><div class="opt-s">iFood, Uber, comprinhas... some sem eu perceber</div></div><div class="opt-check">✓</div></div>
+      <div class="opt" onclick="pick(this,'s3','c',3)"><div class="opt-ico">📱</div><div class="opt-body"><div class="opt-t">Anoto em planilhas ou apps, mas nunca mantenho</div><div class="opt-s">Começo bem e abandono na terceira semana</div></div><div class="opt-check">✓</div></div>
+      <div class="opt" onclick="pick(this,'s3','d',3)"><div class="opt-ico">📊</div><div class="opt-body"><div class="opt-t">Tenho controle parcial, quero algo mais automático</div><div class="opt-s">Planilha manual é tedioso demais</div></div><div class="opt-check">✓</div></div>
+    </div>
+    <button class="btn-adv" id="b3" onclick="adv('s4')">Próxima →</button>
+  </div>
+
+  <!-- S4 -->
+  <div id="s4" class="screen">
+    <div class="prog-wrap"><div class="prog-top"><span class="prog-q">4 de 7</span><span class="prog-pct">57%</span></div><div class="prog-track"><div class="prog-fill" style="width:57%"></div></div></div>
+    <div class="q-cat">HISTÓRICO</div>
+    <div class="q-txt">Quantas vezes você já tentou se organizar financeiramente e desistiu?</div>
+    <div class="opts">
+      <div class="opt" onclick="pick(this,'s4','a',4)"><div class="opt-ico">1️⃣</div><div class="opt-body"><div class="opt-t">Essa será minha primeira tentativa real</div><div class="opt-s">Até hoje fui levando na intuição</div></div><div class="opt-check">✓</div></div>
+      <div class="opt" onclick="pick(this,'s4','b',4)"><div class="opt-ico">2️⃣</div><div class="opt-body"><div class="opt-t">Já tentei 1 ou 2 vezes — durou pouco</div><div class="opt-s">Sempre aparece algo que quebra a rotina</div></div><div class="opt-check">✓</div></div>
+      <div class="opt" onclick="pick(this,'s4','c',4)"><div class="opt-ico">🔄</div><div class="opt-body"><div class="opt-t">Perdi a conta de quantas vezes já tentei</div><div class="opt-s">Começo bem uns dias e abandono</div></div><div class="opt-check">✓</div></div>
+      <div class="opt" onclick="pick(this,'s4','d',4)"><div class="opt-ico">💪</div><div class="opt-body"><div class="opt-t">Tenho uma base, mas preciso de algo melhor</div><div class="opt-s">O que uso hoje é incompleto ou trabalhoso</div></div><div class="opt-check">✓</div></div>
+    </div>
+    <button class="btn-adv" id="b4" onclick="adv('s5')">Próxima →</button>
+  </div>
+
+  <!-- S5 -->
+  <div id="s5" class="screen">
+    <div class="prog-wrap"><div class="prog-top"><span class="prog-q">5 de 7</span><span class="prog-pct">71%</span></div><div class="prog-track"><div class="prog-fill" style="width:71%"></div></div></div>
+    <div class="q-cat">OBJETIVO</div>
+    <div class="q-txt">Se você resolvesse sua vida financeira agora, qual seria a primeira mudança?</div>
+    <div class="opts">
+      <div class="opt" onclick="pick(this,'s5','a',5)"><div class="opt-ico">🏦</div><div class="opt-body"><div class="opt-t">Sair do vermelho e quitar minhas dívidas</div><div class="opt-s">Dormir sem essa pressão constante</div></div><div class="opt-check">✓</div></div>
+      <div class="opt" onclick="pick(this,'s5','b',5)"><div class="opt-ico">🛡️</div><div class="opt-body"><div class="opt-t">Construir uma reserva de emergência de verdade</div><div class="opt-s">Parar de depender de cheque especial ou família</div></div><div class="opt-check">✓</div></div>
+      <div class="opt" onclick="pick(this,'s5','c',5)"><div class="opt-ico">📈</div><div class="opt-body"><div class="opt-t">Começar a investir e ver meu dinheiro crescer</div><div class="opt-s">Quero que meu dinheiro trabalhe por mim</div></div><div class="opt-check">✓</div></div>
+      <div class="opt" onclick="pick(this,'s5','d',5)"><div class="opt-ico">🎯</div><div class="opt-body"><div class="opt-t">Ter previsibilidade — saber o que tenho e para onde vai</div><div class="opt-s">Chega de surpresas no extrato</div></div><div class="opt-check">✓</div></div>
+    </div>
+    <button class="btn-adv" id="b5" onclick="adv('s6')">Próxima →</button>
+  </div>
+
+  <!-- S6 -->
+  <div id="s6" class="screen">
+    <div class="prog-wrap"><div class="prog-top"><span class="prog-q">6 de 7</span><span class="prog-pct">85%</span></div><div class="prog-track"><div class="prog-fill" style="width:85%"></div></div></div>
+    <div class="q-cat">TEMPO DISPONÍVEL</div>
+    <div class="q-txt">Quantos minutos por semana você consegue dedicar às suas finanças?</div>
+    <div class="opts">
+      <div class="opt" onclick="pick(this,'s6','a',6)"><div class="opt-ico">⚡</div><div class="opt-body"><div class="opt-t">Menos de 15 minutos — precisa ser muito prático</div><div class="opt-s">Rotina corrida, não quero mais uma tarefa pesada</div></div><div class="opt-check">✓</div></div>
+      <div class="opt" onclick="pick(this,'s6','b',6)"><div class="opt-ico">🕐</div><div class="opt-body"><div class="opt-t">Entre 15 e 30 minutos por semana</div><div class="opt-s">Posso separar um tempo se valer a pena</div></div><div class="opt-check">✓</div></div>
+      <div class="opt" onclick="pick(this,'s6','c',6)"><div class="opt-ico">📆</div><div class="opt-body"><div class="opt-t">Até 1 hora — estou comprometido a mudar de vez</div><div class="opt-s">Se resolver meu problema, vale qualquer esforço</div></div><div class="opt-check">✓</div></div>
+    </div>
+    <button class="btn-adv" id="b6" onclick="adv('s7')">Próxima →</button>
+  </div>
+
+  <!-- S7 -->
+  <div id="s7" class="screen">
+    <div class="prog-wrap"><div class="prog-top"><span class="prog-q">7 de 7</span><span class="prog-pct">99%</span></div><div class="prog-track"><div class="prog-fill" style="width:99%"></div></div></div>
+    <div class="q-cat">ÚLTIMA PERGUNTA</div>
+    <div class="q-txt">O que mais te impede de organizar suas finanças até hoje?</div>
+    <div class="opts">
+      <div class="opt" onclick="pick(this,'s7','a',7)"><div class="opt-ico">🧠</div><div class="opt-body"><div class="opt-t">Não sei por onde começar — parece complicado demais</div><div class="opt-s">Educação financeira parece coisa de gente rica</div></div><div class="opt-check">✓</div></div>
+      <div class="opt" onclick="pick(this,'s7','b',7)"><div class="opt-ico">⚡</div><div class="opt-body"><div class="opt-t">Falta disciplina — sei o que fazer mas não consigo</div><div class="opt-s">Preciso de algo automático que independa de força de vontade</div></div><div class="opt-check">✓</div></div>
+      <div class="opt" onclick="pick(this,'s7','c',7)"><div class="opt-ico">🛠️</div><div class="opt-body"><div class="opt-t">Nunca achei uma ferramenta simples e eficiente</div><div class="opt-s">Planilhas complicadas, apps confusos — nada que consiga manter</div></div><div class="opt-check">✓</div></div>
+      <div class="opt" onclick="pick(this,'s7','d',7)"><div class="opt-ico">💸</div><div class="opt-body"><div class="opt-t">Situação tão bagunçada que dá vontade de nem olhar</div><div class="opt-s">Às vezes é mais fácil ignorar do que enfrentar a realidade</div></div><div class="opt-check">✓</div></div>
+    </div>
+    <button class="btn-adv" id="b7" onclick="adv('sCapture')">Ver meu diagnóstico →</button>
+  </div>
+
+  <!-- CAPTURE -->
+  <div id="sCapture" class="screen">
+    <div class="prog-wrap"><div class="prog-top"><span class="prog-q">Quase lá!</span><span class="prog-pct">100%</span></div><div class="prog-track"><div class="prog-fill" style="width:100%"></div></div></div>
+    <div class="chip"><span class="chip-dot"></span>PERSONALIZANDO SEU RESULTADO</div>
+    <h1>Para um diagnóstico <em>100% personalizado</em>, precisamos de algumas informações</h1>
+    <p class="lead">Seu resultado vai usar seu nome e perfil para mostrar exatamente quanto dinheiro você está perdendo — e o que fazer agora.</p>
+    <div class="capture-card">
+      <div class="field-wrap">
+        <div class="field-label">Qual é o seu primeiro nome?</div>
+        <input class="field-input" id="fname" type="text" placeholder="Ex: Maria, João, Ana..." oninput="checkCapture()" autocomplete="given-name" />
+      </div>
+      <div class="field-wrap">
+        <div class="field-label">Qual é a sua renda mensal aproximada?</div>
+        <select class="field-input" id="fincome" onchange="checkCapture()">
+          <option value="">Selecione...</option>
+          <option value="1">Até R$ 2.000</option>
+          <option value="2">R$ 2.000 – R$ 4.000</option>
+          <option value="3">R$ 4.000 – R$ 7.000</option>
+          <option value="4">R$ 7.000 – R$ 12.000</option>
+          <option value="5">Acima de R$ 12.000</option>
+        </select>
+      </div>
+      <div class="field-wrap">
+        <div class="field-label">Há quanto tempo você está nessa situação financeira?</div>
+        <select class="field-input" id="ftime" onchange="checkCapture()">
+          <option value="">Selecione...</option>
+          <option value="1">Menos de 6 meses</option>
+          <option value="2">Entre 6 meses e 2 anos</option>
+          <option value="3">Entre 2 e 5 anos</option>
+          <option value="4">Mais de 5 anos</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn-adv" id="bCapture" onclick="buildResult()">Gerar meu diagnóstico personalizado →</button>
+    <p class="capture-note">🔒 Seus dados são usados apenas para personalizar o resultado.</p>
+  </div>
+
+  <!-- RESULT -->
+  <div id="sResult" class="screen">
+    <div class="result-top">
+      <div class="score-ring">
+        <svg width="110" height="110" viewBox="0 0 110 110">
+          <circle cx="55" cy="55" r="46" fill="none" stroke="#e0f0e8" stroke-width="8"/>
+          <circle id="arc" cx="55" cy="55" r="46" fill="none" stroke="#1a9a5c" stroke-width="8" stroke-linecap="round" stroke-dasharray="289" stroke-dashoffset="289" style="transition:stroke-dashoffset 1.3s cubic-bezier(.22,1,.36,1)"/>
+        </svg>
+        <div class="score-inner"><div class="score-big" id="sNum">0</div><div class="score-lbl">DE RISCO</div></div>
+      </div>
+      <div class="chip" id="rChip" style="margin:0 auto .75rem"><span class="chip-dot"></span><span id="rChipTxt"></span></div>
+      <h1 id="rH" style="font-size:21px;text-align:center;margin-bottom:.5rem"></h1>
+      <p class="lead" id="rSub" style="text-align:center;font-size:13px;margin-bottom:0"></p>
+    </div>
+
+    <div class="diag-box">
+      <div class="diag-hd">Diagnóstico personalizado de <span id="diagName"></span></div>
+      <div class="diag-row"><div class="diag-icon di-r">🚨</div><div class="diag-body" id="d1"></div></div>
+      <div class="diag-row"><div class="diag-icon di-y">⚠️</div><div class="diag-body" id="d2"></div></div>
+      <div class="diag-row"><div class="diag-icon di-g">✅</div><div class="diag-body" id="d3"></div></div>
+    </div>
+
+    <div class="section-ttl">Calculadoras para o seu perfil</div>
+    <div class="calc-card">
+      <div class="calc-ttl">💸 Quanto você está perdendo por mês?</div>
+      <div class="calc-sub">Ajuste seus gastos variáveis e veja o desperdício real acontecendo</div>
+      <div class="sl-row"><div class="sl-lbl"><span>Gastos variáveis/mês</span><span class="sl-val" id="sv1">R$ 800</span></div><input type="range" min="200" max="3000" step="50" value="800" oninput="c1(this.value)" /></div>
+      <div class="metrics-grid">
+        <div class="met"><div class="met-l">Desperdício estimado (30%)</div><div class="met-v r" id="m1a">R$ 240</div></div>
+        <div class="met"><div class="met-l">Perda acumulada em 1 ano</div><div class="met-v y" id="m1b">R$ 2.880</div></div>
+        <div class="met"><div class="met-l">Economia com MFO (70%)</div><div class="met-v g" id="m1c">R$ 2.016</div></div>
+        <div class="met"><div class="met-l">Retorno sobre R$ 27</div><div class="met-v g" id="m1d">74×</div></div>
+      </div>
+    </div>
+
+    <div class="calc-card">
+      <div class="calc-ttl">🎯 Em quanto tempo você chega na sua meta?</div>
+      <div class="calc-sub">Escolha uma meta e descubra seu prazo com o sistema organizado</div>
+      <div class="goal-chips">
+        <button class="gc on" onclick="setG(this,1000)">Reserva R$1k</button>
+        <button class="gc" onclick="setG(this,5000)">R$ 5.000</button>
+        <button class="gc" onclick="setG(this,10000)">R$ 10.000</button>
+        <button class="gc" onclick="setG(this,30000)">R$ 30.000</button>
+      </div>
+      <div class="sl-row"><div class="sl-lbl"><span>Consegue guardar por mês</span><span class="sl-val" id="sv2">R$ 300</span></div><input type="range" min="100" max="2000" step="50" value="300" oninput="c2(this.value)" /></div>
+      <div class="goal-result"><div class="goal-num" id="gN">4</div><div class="goal-sub" id="gSub">meses para alcançar R$ 1.000</div></div>
+    </div>
+
+    <div class="calc-card">
+      <div class="calc-ttl">💳 Simulador de dívida no cartão</div>
+      <div class="calc-sub">Veja a diferença brutal entre pagar o mínimo e ter um plano organizado</div>
+      <div class="sl-row"><div class="sl-lbl"><span>Dívida atual no cartão</span><span class="sl-val" id="sv3">R$ 2.000</span></div><input type="range" min="500" max="20000" step="500" value="2000" oninput="c3(this.value)" /></div>
+      <div class="metrics-grid">
+        <div class="met"><div class="met-l">Pagando só o mínimo (2%)</div><div class="met-v r" id="cc1">47 meses</div></div>
+        <div class="met"><div class="met-l">Total de juros pagos</div><div class="met-v r" id="cc2">R$ 3.200</div></div>
+        <div class="met"><div class="met-l">Com plano estruturado</div><div class="met-v g" id="cc3">8 meses</div></div>
+        <div class="met"><div class="met-l">Você economiza em juros</div><div class="met-v g" id="cc4">R$ 2.400</div></div>
+      </div>
+    </div>
+
+    <div class="section-ttl" style="margin-top:.25rem">Como fica seu dashboard</div>
+    <div class="mockup-wrap">
+      <div class="mock-label">Preview do app</div>
+      <div class="mock-head">
+        <div class="mock-greet"><strong id="mockName">João 👋</strong>Dashboard · Abril 2026</div>
+        <div class="mock-bell">🔔</div>
+      </div>
+      <div class="mock-cards">
+        <div class="mock-c g"><div class="mock-cl">Saldo disponível</div><div class="mock-cv g" id="mockSaldo">R$ 1.847</div><div class="mock-ct up">↑ 12% vs mês passado</div></div>
+        <div class="mock-c r"><div class="mock-cl">Gastos do mês</div><div class="mock-cv r" id="mockGastos">R$ 2.153</div><div class="mock-ct dn">↓ 8% vs sua meta</div></div>
+      </div>
+      <div class="mock-kpis">
+        <div class="mock-kpi"><span id="mkCart">R$ 743</span><small>Cartões</small></div>
+        <div class="mock-kpi"><span id="mkGuard">R$ 500</span><small>Guardado</small></div>
+        <div class="mock-kpi"><span>73%</span><small>Meta do mês</small></div>
+        <div class="mock-kpi"><span>R$ 12</span><small>Média/dia</small></div>
+      </div>
+      <div class="mock-txn-ttl">Últimas transações</div>
+      <div class="mock-txns">
+        <div class="mock-txn"><div class="mock-txn-l"><div class="mock-cat" style="background:#eaf7f0">🛒</div>Mercado</div><div class="mock-amt">-R$ 187</div></div>
+        <div class="mock-txn"><div class="mock-txn-l"><div class="mock-cat" style="background:#fff0ea">🍔</div>iFood</div><div class="mock-amt">-R$ 42</div></div>
+        <div class="mock-txn"><div class="mock-txn-l"><div class="mock-cat" style="background:#eaf0ff">⚡</div>Conta de luz</div><div class="mock-amt">-R$ 134</div></div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="pricing-intro">
+      <div class="chip" style="margin-bottom:.75rem"><span class="chip-dot"></span>OFERTA ESPECIAL PARA VOCÊ</div>
+      <h2 id="pricingH">Escolha o plano ideal para você</h2>
+      <p id="pricingP">Acesso completo ao Minhas Finanças Organizadas. Cancele quando quiser.</p>
+    </div>
+    <div class="urgency-box"><div class="ub-icon">⚡</div><div class="ub-txt">Oferta exclusiva para quem fez o diagnóstico hoje. O preço normal é R$ 67/mês.</div></div>
+
+    <div class="plans">
+      <div class="plan">
+        <div class="plan-top">
+          <div><div class="plan-name">Mensal</div><div class="plan-period">Renovação automática todo mês</div></div>
+          <div class="plan-price"><div class="plan-from">R$ 67/mês</div><div class="plan-val">R$ 27<span>/mês</span></div><div class="plan-billed">Cobrado R$ 27/mês</div></div>
+        </div>
+        <div class="plan-features">
+          <div class="plan-feat"><div class="pf-ck">✓</div>Dashboard financeiro completo</div>
+          <div class="plan-feat"><div class="pf-ck">✓</div>Controle de cartões de crédito</div>
+          <div class="plan-feat"><div class="pf-ck">✓</div>Relatórios mensais automáticos</div>
+          <div class="plan-feat"><div class="pf-ck no">✗</div><span style="color:var(--txt3)">Projeção de fluxo de caixa</span></div>
+          <div class="plan-feat"><div class="pf-ck no">✗</div><span style="color:var(--txt3)">Simulador de metas e investimentos</span></div>
+          <div class="plan-feat"><div class="pf-ck no">✗</div><span style="color:var(--txt3)">Alertas inteligentes de gastos</span></div>
+        </div>
+        <button class="plan-cta" onclick="window.open('https://genius.tynk.ai','_blank')">Começar com o mensal</button>
+      </div>
+
+      <div class="plan featured">
+        <div class="plan-badge">🏆 MAIS VENDIDO — MELHOR CUSTO-BENEFÍCIO</div>
+        <div class="plan-top" style="margin-top:.5rem">
+          <div><div class="plan-name">Trimestral</div><div class="plan-period">3 meses · sem compromisso longo</div></div>
+          <div class="plan-price"><div class="plan-from">R$ 67/mês</div><div class="plan-val">R$ 17<span>/mês</span></div><div class="plan-billed">Cobrado R$ 51 a cada 3 meses</div></div>
+        </div>
+        <div class="plan-saving">Você economiza R$ 150/ano comparado ao mensal</div>
+        <div class="plan-features">
+          <div class="plan-feat"><div class="pf-ck">✓</div>Dashboard financeiro completo</div>
+          <div class="plan-feat"><div class="pf-ck">✓</div>Controle de múltiplos cartões</div>
+          <div class="plan-feat"><div class="pf-ck">✓</div>Relatórios mensais e trimestrais</div>
+          <div class="plan-feat"><div class="pf-ck">✓</div>Projeção de fluxo de caixa (6 meses)</div>
+          <div class="plan-feat"><div class="pf-ck">✓</div>Simulador de metas e investimentos</div>
+          <div class="plan-feat"><div class="pf-ck">✓</div>Alertas inteligentes de gastos</div>
+        </div>
+        <button class="plan-cta" onclick="window.open('https://genius.tynk.ai','_blank')">Quero o plano mais vendido →</button>
+      </div>
+
+      <div class="plan">
+        <div class="plan-top">
+          <div><div class="plan-name">Semestral</div><div class="plan-period">6 meses · transformação completa</div></div>
+          <div class="plan-price"><div class="plan-from">R$ 67/mês</div><div class="plan-val">R$ 12<span>/mês</span></div><div class="plan-billed">Cobrado R$ 72 a cada 6 meses</div></div>
+        </div>
+        <div class="plan-saving">Maior economia — R$ 330/ano comparado ao mensal</div>
+        <div class="plan-features">
+          <div class="plan-feat"><div class="pf-ck">✓</div>Tudo do plano Trimestral</div>
+          <div class="plan-feat"><div class="pf-ck">✓</div>Projeção de fluxo de caixa (12 meses)</div>
+          <div class="plan-feat"><div class="pf-ck">✓</div>Relatórios anuais com análise de evolução</div>
+          <div class="plan-feat"><div class="pf-ck">✓</div>Análise inteligente por categoria</div>
+          <div class="plan-feat"><div class="pf-ck">✓</div>Metas de patrimônio de longo prazo</div>
+          <div class="plan-feat"><div class="pf-ck">✓</div>Suporte prioritário via e-mail</div>
+        </div>
+        <button class="plan-cta" onclick="window.open('https://genius.tynk.ai','_blank')">Quero a maior economia</button>
+      </div>
+    </div>
+
+    <div class="guarantee">
+      <div class="gua-icon">🛡️</div>
+      <div class="gua-txt"><strong>Garantia incondicional de 7 dias.</strong> Se por qualquer motivo você não gostar, devolvemos 100% do valor sem perguntas. O risco é todo nosso.</div>
+    </div>
+    <div class="divider"></div>
+    <div class="footer-note" id="footerNote">Mais de 23.000 pessoas já transformaram suas finanças com o MFO.<br>O único risco real é continuar no mesmo ciclo mais um mês.</div>
+  </div>
+
+</div><!-- .page-wrap -->
+
+<script>
+  var ans={}, userName='', userIncome=0, userTime=0, goalVal=1000, monthSave=300;
+
+  function goTo(id){
+    document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});
+    document.getElementById(id).classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  function adv(next){goTo(next);}
+  function pick(el,screen,val,n){
+    el.closest('.opts').querySelectorAll('.opt').forEach(function(o){o.classList.remove('sel')});
+    el.classList.add('sel'); ans[screen]=val;
+    var btn=document.getElementById('b'+n); if(btn) btn.classList.add('on');
+  }
+  function checkCapture(){
+    var n=document.getElementById('fname').value.trim();
+    var i=document.getElementById('fincome').value;
+    var t=document.getElementById('ftime').value;
+    var btn=document.getElementById('bCapture');
+    if(n.length>=2&&i&&t){btn.classList.add('on');}else{btn.classList.remove('on');}
+  }
+  function fmt(n){return 'R$ '+Math.round(n).toLocaleString('pt-BR');}
+  function c1(v){
+    v=parseInt(v); document.getElementById('sv1').textContent=fmt(v);
+    var w=v*.3,y=w*12,s=y*.7;
+    document.getElementById('m1a').textContent=fmt(w);
+    document.getElementById('m1b').textContent=fmt(y);
+    document.getElementById('m1c').textContent=fmt(s);
+    document.getElementById('m1d').textContent=Math.round(s/27)+'×';
+  }
+  function setG(el,v){
+    document.querySelectorAll('.gc').forEach(function(b){b.classList.remove('on')});
+    el.classList.add('on'); goalVal=v; c2(monthSave);
+  }
+  function c2(v){
+    v=parseInt(v); monthSave=v;
+    document.getElementById('sv2').textContent=fmt(v);
+    var m=Math.ceil(goalVal/v);
+    document.getElementById('gN').textContent=m;
+    document.getElementById('gSub').textContent='meses para alcançar '+fmt(goalVal);
+  }
+  function c3(v){
+    v=parseInt(v); document.getElementById('sv3').textContent=fmt(v);
+    var m=0,bal=v,tot=0;
+    while(bal>1&&m<120){var pay=Math.max(bal*.02,10);var intr=bal*.14;tot+=intr;bal=bal+intr-pay;m++;}
+    var org=Math.ceil(v/250),orgI=org*v*.005;
+    document.getElementById('cc1').textContent=m+' meses';
+    document.getElementById('cc2').textContent=fmt(tot);
+    document.getElementById('cc3').textContent=org+' meses';
+    document.getElementById('cc4').textContent=fmt(tot-orgI);
+  }
+  function animScore(target){
+    var el=document.getElementById('sNum'),arc=document.getElementById('arc'),circ=289,t0=null;
+    function step(ts){
+      if(!t0)t0=ts; var p=Math.min((ts-t0)/1300,1),e=1-Math.pow(1-p,3),cur=Math.round(e*target);
+      el.textContent=cur; arc.style.strokeDashoffset=circ-(circ*(cur/100));
+      if(p<1)requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  var iLbls=['','até R$ 2.000','R$ 2.000–4.000','R$ 4.000–7.000','R$ 7.000–12.000','acima de R$ 12.000'];
+  var dGastos=[500,800,1200,2000,3000];
+  var dGuard=[100,200,400,700,1500];
+  function buildResult(){
+    userName=document.getElementById('fname').value.trim();
+    userIncome=parseInt(document.getElementById('fincome').value)||2;
+    userTime=parseInt(document.getElementById('ftime').value)||2;
+    var fn=userName.charAt(0).toUpperCase()+userName.slice(1).toLowerCase();
+    var reds=['s1','s2','s3'].filter(function(k){return ans[k]==='a'||ans[k]==='b'}).length;
+    var score=reds>=2?84:reds===0?46:70;
+    if(userTime>=3)score=Math.min(score+6,95);
+    var gv=dGastos[userIncome-1]||800, gs=dGuard[userIncome-1]||200;
+    document.getElementById('mockName').textContent=fn+' 👋';
+    document.getElementById('mockSaldo').textContent=fmt(gv*.7);
+    document.getElementById('mockGastos').textContent=fmt(gv);
+    document.getElementById('mkCart').textContent=fmt(gv*.35);
+    document.getElementById('mkGuard').textContent=fmt(gs);
+    c1(gv); c2(300); c3(2000);
+    var gMap={a:'sair do vermelho e quitar suas dívidas',b:'construir uma reserva de emergência',c:'começar a investir',d:'ter previsibilidade financeira total'};
+    var goal=gMap[ans['s5']]||'organizar suas finanças';
+    var income=iLbls[userIncome];
+    if(score>=75){
+      document.getElementById('rChipTxt').textContent='NÍVEL CRÍTICO — AÇÃO IMEDIATA';
+      document.getElementById('rH').textContent=fn+', sua situação pede uma virada agora — e a solução é mais simples do que parece';
+      document.getElementById('rSub').textContent='Com renda de '+income+', cada mês sem um sistema estruturado está te custando mais do que o dobro do que você imagina.';
+      document.getElementById('d1').innerHTML='<strong>'+fn+', você está preso num ciclo silencioso:</strong> sem visibilidade dos seus gastos, o dinheiro escorrega por buracos invisíveis. Estimamos que você perde entre 25–35% do seu orçamento sem perceber.';
+      document.getElementById('d2').innerHTML='<strong>Força de vontade sozinha nunca funcionou</strong> — e nunca vai funcionar. O problema não é você, é a falta de estrutura automática que te dê visibilidade real.';
+      document.getElementById('d3').innerHTML='<strong>A virada está a R$ 17/mês de distância.</strong> Pessoas em situação pior que a sua reverteram em 60–90 dias com o MFO. Seu objetivo de '+goal+' pode começar ainda essa semana.';
+    }else if(score>=55){
+      document.getElementById('rChipTxt').textContent='POTENCIAL DESPERDIÇADO — HORA DE AGIR';
+      document.getElementById('rH').textContent=fn+', você está quase lá — falta só o sistema certo para destravar suas finanças';
+      document.getElementById('rSub').textContent='Com renda de '+income+', você tem tudo que precisa para '+goal+'. O que falta é automação — não esforço.';
+      document.getElementById('d1').innerHTML='<strong>'+fn+', você tem consciência financeira</strong> — isso já te coloca à frente de 70% das pessoas. Mas sem automação, você depende de disciplina diária, que falha em momentos de estresse.';
+      document.getElementById('d2').innerHTML='<strong>Gastos variáveis ocultos</strong> provavelmente representam 30–40% do seu orçamento. Pequenas compras do dia a dia e assinaturas esquecidas somam mais do que você imagina.';
+      document.getElementById('d3').innerHTML='<strong>Você está a poucos passos da virada.</strong> Com '+income+' de renda e o sistema certo, em menos de 90 dias você teria visibilidade total e um plano concreto para '+goal+'.';
+    }else{
+      document.getElementById('rChipTxt').textContent='BOA BASE — MOMENTO DE ESCALAR';
+      document.getElementById('rH').textContent=fn+', você tem uma base sólida — agora é hora de automatizar e crescer';
+      document.getElementById('rSub').textContent='Com '+income+' de renda e uma boa consciência financeira, um sistema automatizado pode multiplicar seus resultados.';
+      document.getElementById('d1').innerHTML='<strong>'+fn+', você já faz muita coisa certa</strong> — mas ainda gasta energia em tarefas manuais que um bom dashboard resolveria em segundos.';
+      document.getElementById('d2').innerHTML='<strong>Sem projeção de fluxo de caixa</strong>, decisões de investimento ficam no achismo. Com o MFO, você teria visão clara dos próximos 6–12 meses.';
+      document.getElementById('d3').innerHTML='<strong>Seu objetivo de '+goal+'</strong> está ao alcance. Com automação completa e a renda que você tem, é possível acelerar muito o caminho.';
+    }
+    document.getElementById('diagName').textContent=fn;
+    document.getElementById('pricingH').textContent=fn+', escolha como quer transformar suas finanças';
+    document.getElementById('pricingP').textContent='Acesso completo ao sistema que já ajudou mais de 23.000 pessoas a '+goal+'. Cancele quando quiser.';
+    document.getElementById('footerNote').textContent=fn+', mais de 23.000 pessoas já deram esse passo. O único risco real é continuar no mesmo ciclo mais um mês.';
+    goTo('sResult');
+    setTimeout(function(){animScore(score);},400);
+  }
+</script>
+</body>
+</html>
